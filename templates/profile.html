@@ -1,0 +1,62 @@
+{% extends "base.html" %} 
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">
+                {{ profile_user.displayName }}
+            </h2>
+            <p class="text-muted">
+                @{{ profile_user.username }}
+            </p>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Email</strong>
+                    <p>{{ profile_user.email }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Tutors For</strong>
+                    <p>{{ profile_user.tutorFor }}</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h3>Availability</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for availability in profile_user.availability_set.all %}
+                        <tr>
+                            <td>{{ availability.day }}</td>
+                            <td>{{ availability.start_time }}</td>
+                            <td>{{ availability.end_time }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">
+                                No availability listed.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

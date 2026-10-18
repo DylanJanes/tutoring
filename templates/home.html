@@ -12,7 +12,81 @@
 </form>
 {% else %}
 <p>You are not logged in</p>
-<a href="{% url 'login' %}">Log In</a> | <!--The "|" is included in the book, might need to be removed-->
+<a href="{% url 'login' %}">Log In</a> |
 <a href="{% url 'signup' %}">Sign Up</a>
 {% endif %}
+
+{% for user in users %}
+    <a href="{% url 'user_detail' user.pk %}">
+        {{ user.username }}
+    </a>
+{% endfor %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        Tutor Availability
+    </h2>
+
+    <div id="calendar"></div>
+
+</div>
+
+<!-- FullCalendar, nifty JS thing for a calendar to display everything-->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const calendarElement = document.getElementById("calendar")
+
+        const calendar = new FullCalendar.Calendar(
+            calendarElement,
+            {
+                initialView: "timeGridWeek",
+                headerToolbar: false,
+                weekends: false,
+                slotMinTime: "08:00:00",
+                slotMaxTime: "20:00:00",
+                slotDuration: "00:15:00",
+                slotLabelInterval: "01:00:00",
+                allDaySlot: false,
+                nowIndicator: true,
+                height: "auto",
+                expandRows: true,
+
+                dayHeaderFormat: {weekday: "long"}, 
+
+                events: {{ calendar_events|safe }},
+
+                eventContent: function(info) {
+                    const container = document.createElement("div")
+                    const title = document.createElement("strong")
+                    title.innerText = info.event.title;
+
+                    const time = document.createElement("div")
+                    time.innerText = info.timeText
+
+                    container.appendChild(title)
+                    container.appendChild(time)
+
+                    return {domNodes: [container]}
+                },
+            }
+        );
+
+        calendar.render()
+    });
+
+</script>
+
+<style>
+    #calendar {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .fc-event { /*Bugfix that GPT told me to use, works!*/
+        cursor: pointer;
+    }
+</style>
 {% endblock content %}
