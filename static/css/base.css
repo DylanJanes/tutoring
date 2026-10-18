@@ -1,0 +1,94 @@
+/* static/css/base.css */
+
+/* Page background and font. */
+body {
+  background-color: #f4f6f9;
+  font-family: Arial, sans-serif;
+  color: #333333;
+}
+
+/* Main content area. */
+main .container {
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+/* Navbar styling. */
+.navbar {
+  background-color: #2c3e50 !important; /* Note: '!important' overrides the bootstrap css. */
+  padding: 12px 20px;
+}
+
+.navbar-brand,
+.nav-link {
+  color: #ffffff !important;
+}
+
+.nav-link:hover {
+  color: #dcdde1 !important;
+}
+
+/* Headings. */
+h2,
+h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+/* Links on the home page. */
+main .container a {
+  display: inline-block;
+  background-color: #ffffff;
+  color: #2c3e50;
+  border: 1px solid #cccccc;
+  padding: 6px 12px;
+  margin: 4px 4px 10px 0;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+main .container a:hover {
+  background-color: #e2e6ea;
+}
+
+/* Keep navbar and dropdown links normal. */
+.navbar a {
+  border: none;
+  margin: 0;
+}
+
+/* Home page calendar box. */
+#calendar {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+/* Profile page cards. */
+.card {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+/* Login and Sign Up forms. */
+form {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  max-width: 500px;
+}
+
+.asteriskField {
+  /* Makes (*) show up red for the required fields. */
+  color: #ff0000;
+  margin-left: 2px;
+}
+
+/* So the tiny logout form doesn't get a big white box around it. */
+.dropdown-menu form {
+  background: none;
+  padding: 0;
+  border: none;
+}
