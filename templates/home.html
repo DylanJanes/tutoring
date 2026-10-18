@@ -5,6 +5,7 @@
 {% block content %}
 {% if user.is_authenticated %}
 <p>Hi {{user.username}}!</p>
+<a href="{% url "add_availability" %}">Manage My Availability</a>
 <form action="{% url 'logout' %}" method="post">
     {% csrf_token %}
     <button type="submit">Log Out</button>
