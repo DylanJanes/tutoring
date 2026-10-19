@@ -1,44 +1,63 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.views.generic import CreateView, DetailView
-from django.contrib.auth.decorators import login_required
+from django.urls import reverse, reverse_lazy
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    UpdateView,
+    DeleteView,
+)
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 
 from .forms import CustomUserCreationForm, AvailabilityForm
+from .models import Availability
 
 User = get_user_model()
+
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "registration/signup.html"
 
     def get_success_url(self):
-        return reverse("user_detail",kwargs={"pk": self.object.pk})
+        return reverse("user_detail", kwargs={"pk": self.object.pk})
 
 
-@login_required
-def add_availability(request):
-    if request.method == "POST":
-        form = AvailabilityForm(request.POST)
+class AddAvailabilityView(LoginRequiredMixin, CreateView):
+    model = Availability
+    form_class = AvailabilityForm
+    template_name = "accounts/availability_form.html"
+    success_url = reverse_lazy("add_availability")
 
-        if form.is_valid():
-            availability = form.save(commit=False)
-            availability.user = request.user
-            availability.save()
-            return redirect("add_availability")
-    else:
-        form = AvailabilityForm()
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
-    availabilities = request.user.availabilities.all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["availabilities"] = (
+            self.request.user.availabilities.all()
+        )
+        return context
 
-    return render(
-        request,
-        "accounts/availability_form.html",
-        {
-            "form": form,
-            "availabilities": availabilities,
-        },
-    )
+
+class EditAvailabilityView(LoginRequiredMixin, UpdateView):
+    model = Availability
+    form_class = AvailabilityForm
+    template_name = "accounts/edit_availability.html"
+    success_url = reverse_lazy("add_availability")
+
+    def get_queryset(self):
+        return Availability.objects.filter(user=self.request.user)
+
+
+class DeleteAvailabilityView(LoginRequiredMixin, DeleteView):
+    model = Availability
+    template_name = "accounts/delete_availability.html"
+    success_url = reverse_lazy("add_availability")
+
+    def get_queryset(self):
+        return Availability.objects.filter(user=self.request.user)
+
 
 class ProfileView(DetailView):
     model = User

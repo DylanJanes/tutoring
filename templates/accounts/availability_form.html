@@ -1,29 +1,45 @@
-{% extends "base.html" %} 
 
-{% block content %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>My Availability</title>
-  </head>
-  <body>
-    <h1>Set Your Availability</h1>
+{% extends "accounts/availability_base.html" %}
 
-    <form method="post">
-      {% csrf_token %} {{ form.as_p }}
-      <button type="submit">Save Availability</button>
-    </form>
+{% block title %}My Availability{% endblock %}
 
-    <h2>My Current Availability</h2>
+{% block availability_content %}
+<h1>My Availability</h1>
 
-    {% for availability in availabilities %}
-    <p>
-      {{ availability.get_day_display }}: {{ availability.start_time|time:"g:iA" }} - {{ availability.end_time|time:"g:i A" }}
-    </p>
-    {% empty %}
+<p>Add the days and times when you are available.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Add Availability</button>
+</form>
+
+<hr>
+
+<h2>Saved Availability</h2>
+
+{% for availability in availabilities %}
+    <div class="availability-entry">
+        <strong>{{ availability.get_day_display }}</strong>
+        <p>
+            {{ availability.start_time|time:"g:i A" }} –
+            {{ availability.end_time|time:"g:i A" }}
+        </p>
+
+        <div class="actions">
+            <a class="action-button"
+               href="{% url 'edit_availability' availability.pk %}">
+                Edit
+            </a>
+
+            <a class="action-button"
+               href="{% url 'delete_availability' availability.pk %}">
+                Delete
+            </a>
+        </div>
+    </div>
+{% empty %}
     <p>You haven't added any availability yet.</p>
-    {% endfor %}
-  </body>
-</html>
-{% endblock content %}
+{% endfor %}
+{% endblock availability_content%}
