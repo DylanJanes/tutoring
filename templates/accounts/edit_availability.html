@@ -1,0 +1,22 @@
+{% extends "accounts/availability_base.html" %}
+
+{% block title %}Edit Availability{% endblock %}
+
+{% block availability_content %}
+<h1>Edit Availability</h1>
+
+<p>Update the day and times for this availability entry.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit">Save Changes</button>
+
+        <a class="button" href="{% url 'add_availability' %}">
+            Cancel
+        </a>
+    </div>
+</form>
+{% endblock availability_content %}
