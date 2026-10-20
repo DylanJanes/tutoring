@@ -140,5 +140,23 @@
     .fc-event { /*Bugfix that GPT told me to use, works!*/
         cursor: pointer;
     }
+    /* Only apply these changes when the browser prefers light mode */
+    @media (prefers-color-scheme: light) {
+        /* Reserved calendar events: black text by default */
+        #calendar .fc-event,
+        #calendar .fc-event .fc-event-main,
+        #calendar .fc-event strong,
+        #calendar .fc-event div {
+            color: black;
+        }
+
+        /* Change reserved event text to white when hovering */
+        #calendar .fc-event:hover,
+        #calendar .fc-event:hover .fc-event-main,
+        #calendar .fc-event:hover strong,
+        #calendar .fc-event:hover div {
+            color: white;
+        }
+    }
 </style>
 {% endblock content %}
