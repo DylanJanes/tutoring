@@ -40,4 +40,6 @@ class HomePageView(TemplateView):
 
         context["calendar_events"] = json.dumps(events)
 
+        context["users"] = User.objects.all()
+
         return context

@@ -16,11 +16,13 @@
 <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
 {% endif %}
 
+<div class="container mt-4">
 {% for user in users %}
     <a href="{% url 'user_detail' user.pk %}">
         {{ user.username }}
     </a>
 {% endfor %}
+</div>
 
 <div class="container mt-4">
 
@@ -53,8 +55,8 @@
                 initialView: "timeGridWeek",
                 headerToolbar: false,
                 weekends: false,
-                slotMinTime: "00:00:00",
-                slotMaxTime: "24:00:00",
+                slotMinTime: "08:00:00",
+                slotMaxTime: "20:00:00",
                 slotDuration: "00:15:00",
                 slotLabelInterval: "01:00:00",
                 allDaySlot: false,
@@ -137,9 +139,10 @@
         margin: 0 auto;
     }
 
-    .fc-event { /*Bugfix that GPT told me to use, works!*/
+    .fc-event {
         cursor: pointer;
     }
+    
     /* Only apply these changes when the browser prefers light mode */
     @media (prefers-color-scheme: light) {
         /* Reserved calendar events: black text by default */
