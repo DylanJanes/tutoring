@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from accounts.models import Availability
+from accounts.models import Reservation
 import json
 
 User = get_user_model()
@@ -39,5 +40,6 @@ class HomePageView(TemplateView):
             })
 
         context["calendar_events"] = json.dumps(events)
+        context["reservations"] = Reservation.objects.all()
 
         return context

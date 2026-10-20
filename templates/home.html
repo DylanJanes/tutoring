@@ -4,11 +4,12 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-<p>Hi {{user.username}}!</p>
-<a href="{% url "add_availability" %}">Manage My Availability</a>
+<p>Hi {{ user.username }}!</p>
+<a href="{% url 'add_availability' %}">Manage My Availability</a>
+<a href="{% url 'reserve_slot' %}">Reserve a TA Slot</a>
 <form action="{% url 'logout' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Log Out</button>
+  {% csrf_token %}
+  <button type="submit">Log Out</button>
 </form>
 {% else %}
 <p>You are not logged in</p>
@@ -17,128 +18,85 @@
 {% endif %}
 
 {% for user in users %}
-    <a href="{% url 'user_detail' user.pk %}">
-        {{ user.username }}
-    </a>
+<a href="{% url 'user_detail' user.pk %}"> {{ user.username }} </a>
 {% endfor %}
 
 <div class="container mt-4">
+  <h2 class="mb-4">Tutor Availability</h2>
 
-    <h2 class="mb-4">
-        Tutor Availability
-    </h2>
+  <div class="card p-3 mb-4">
+    <h3>Reserved TA Slots</h3>
+    <ul class="mb-0">
+      {% for res in reservations %}
+      <li>
+        <strong>{{ res.tutor.username }}</strong> — {{ res.day }} ({{ res.start_time }}-{{ res.end_time }})
+        <em>[Reserved by {% if res.student %}{{ res.student.username }}{% else %}Guest{% endif %}]</em>
+        <a href="{% url 'reservation_delete' res.pk %}" class="btn btn-danger">Delete</a>
+      </li>
+      {% empty %}
+      <li>No slots reserved yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
 
-    <!-- Box that shows reserved slots when you click them -->
-    <div id="reservation-box" class="card p-3 mb-4" style="display: none;">
-        <h3>My Reserved Slots</h3>
-        <ul id="reservation-list" class="mb-0"></ul>
-    </div>
-
-    <div id="calendar"></div>
-
+  <div id="calendar"></div>
 </div>
 
 <!-- FullCalendar, nifty JS thing for a calendar to display everything-->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const calendarElement = document.getElementById("calendar")
-        const reservationBox = document.getElementById("reservation-box")
-        const reservationList = document.getElementById("reservation-list")
+  document.addEventListener("DOMContentLoaded", function() {
+      const calendarElement = document.getElementById("calendar")
 
-        const calendar = new FullCalendar.Calendar(
-            calendarElement,
-            {
-                initialView: "timeGridWeek",
-                headerToolbar: false,
-                weekends: false,
-                slotMinTime: "08:00:00",
-                slotMaxTime: "20:00:00",
-                slotDuration: "00:15:00",
-                slotLabelInterval: "01:00:00",
-                allDaySlot: false,
-                nowIndicator: true,
-                height: "auto",
-                expandRows: true,
+      const calendar = new FullCalendar.Calendar(
+          calendarElement,
+          {
+              initialView: "timeGridWeek",
+              headerToolbar: false,
+              weekends: false,
+              slotMinTime: "08:00:00",
+              slotMaxTime: "20:00:00",
+              slotDuration: "00:15:00",
+              slotLabelInterval: "01:00:00",
+              allDaySlot: false,
+              nowIndicator: true,
+              height: "auto",
+              expandRows: true,
 
-                dayHeaderFormat: {weekday: "long"}, 
+              dayHeaderFormat: {weekday: "long"},
 
-                events: {{ calendar_events|safe }},
+              events: {{ calendar_events|safe }},
 
-                eventContent: function(info) {
-                    const container = document.createElement("div")
-                    const title = document.createElement("strong")
-                    title.innerText = info.event.title;
+              eventContent: function(info) {
+                  const container = document.createElement("div")
+                  const title = document.createElement("strong")
+                  title.innerText = info.event.title;
 
-                    const time = document.createElement("div")
-                    time.innerText = info.timeText
+                  const time = document.createElement("div")
+                  time.innerText = info.timeText
 
-                    container.appendChild(title)
-                    container.appendChild(time)
+                  container.appendChild(title)
+                  container.appendChild(time)
 
-                    return {domNodes: [container]}
-                },
+                  return {domNodes: [container]}
+              }
+          }
+      );
 
-                //Click an event to reserve or cancel it.
-                eventClick: function(info) {
-                    info.jsEvent.preventDefault() //Prevents from redirecting to profile page.
-
-                    //If already reserved, ask if they want to cancel.
-                    if (info.event.extendedProps.isReserved) {
-                        const cancel = confirm("Cancel reservation with " + info.event.extendedProps.originalTitle + "?")
-                        if (cancel) {
-                            info.event.setProp("title", info.event.extendedProps.originalTitle)
-                            info.event.setExtendedProp("isReserved", false)
-
-                            const item = document.getElementById("res-" + info.event.start.getTime())
-                            if (item) item.remove()
-                            if (reservationList.children.length === 0) {
-                                reservationBox.style.display = "none"
-                            }
-                        }
-                        return
-                    }
-
-                    //Formating for the day and time in the popup and list.
-                    const dayName = info.event.start.toLocaleDateString([], {weekday: "long"})
-                    const startTime = info.event.start.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})
-                    const endTime = info.event.end ? info.event.end.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}) : ""
-                    const timeString = dayName + " (" + startTime + " - " + endTime + ")"
-
-                    //Ask if the user wants to reserve it.
-                    const wantsToReserve = confirm("Reserve slot with " + info.event.title + " on " + timeString + "?")
-
-                    if (wantsToReserve) {
-                        const originalTitle = info.event.title
-                        info.event.setExtendedProp("originalTitle", originalTitle)
-                        info.event.setExtendedProp("isReserved", true)
-                        info.event.setProp("title", originalTitle + " (Reserved)")
-
-                        //Show the reservation box and add the slot to the list.
-                        reservationBox.style.display = "block"
-                        const li = document.createElement("li")
-                        li.id = "res-" + info.event.start.getTime()
-                        li.innerText = originalTitle + " - " + timeString
-                        reservationList.appendChild(li)
-                    }
-                }
-            }
-        );
-
-        calendar.render()
-    });
-
+      calendar.render()
+  });
 </script>
 
 <style>
-    #calendar {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+  #calendar {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-    .fc-event { /*Bugfix that GPT told me to use, works!*/
-        cursor: pointer;
-    }
+  .fc-event {
+    /*Bugfix that GPT told me to use, works!*/
+    cursor: pointer;
+  }
 </style>
 {% endblock content %}

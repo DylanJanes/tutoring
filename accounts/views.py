@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import CreateView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-
 from .forms import CustomUserCreationForm, AvailabilityForm
+from .models import Reservation
 
 User = get_user_model()
 
@@ -44,3 +45,21 @@ class ProfileView(DetailView):
     model = User
     template_name = "profile.html"
     context_object_name = "profile_user"
+
+
+class ReservationCreateView(CreateView):
+    model = Reservation
+    template_name = "reserve_slot.html"
+    fields = ["tutor", "day", "start_time", "end_time"]
+    success_url = reverse_lazy("home")
+
+    def form_valid(self, form):
+        if self.request.user.is_authenticated:
+            form.instance.student = self.request.user
+        return super().form_valid(form)
+
+
+class ReservationDeleteView(DeleteView):
+    model = Reservation
+    template_name = "reservation_confirm_delete.html"
+    success_url = reverse_lazy("home")

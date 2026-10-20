@@ -1,0 +1,8 @@
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block title %}Reserve
+a TA Slot{% endblock title %} {% block content %}
+<h2>Reserve a TA Slot</h2>
+<form method="post">
+  {% csrf_token %} {{ form|crispy }}
+  <button class="btn btn-primary mt-2" type="submit">Reserve Slot</button>
+</form>
+{% endblock content %}
