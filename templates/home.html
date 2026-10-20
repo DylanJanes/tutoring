@@ -28,6 +28,12 @@
         Tutor Availability
     </h2>
 
+    <!-- Box that shows reserved slots when you click them -->
+    <div id="reservation-box" class="card p-3 mb-4" style="display: none;">
+        <h3>My Reserved Slots</h3>
+        <ul id="reservation-list" class="mb-0"></ul>
+    </div>
+
     <div id="calendar"></div>
 
 </div>
@@ -38,6 +44,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const calendarElement = document.getElementById("calendar")
+        const reservationBox = document.getElementById("reservation-box")
+        const reservationList = document.getElementById("reservation-list")
 
         const calendar = new FullCalendar.Calendar(
             calendarElement,
@@ -71,6 +79,50 @@
 
                     return {domNodes: [container]}
                 },
+
+                //Click an event to reserve or cancel it.
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault() //Prevents from redirecting to profile page.
+
+                    //If already reserved, ask if they want to cancel.
+                    if (info.event.extendedProps.isReserved) {
+                        const cancel = confirm("Cancel reservation with " + info.event.extendedProps.originalTitle + "?")
+                        if (cancel) {
+                            info.event.setProp("title", info.event.extendedProps.originalTitle)
+                            info.event.setExtendedProp("isReserved", false)
+
+                            const item = document.getElementById("res-" + info.event.start.getTime())
+                            if (item) item.remove()
+                            if (reservationList.children.length === 0) {
+                                reservationBox.style.display = "none"
+                            }
+                        }
+                        return
+                    }
+
+                    //Formating for the day and time in the popup and list.
+                    const dayName = info.event.start.toLocaleDateString([], {weekday: "long"})
+                    const startTime = info.event.start.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})
+                    const endTime = info.event.end ? info.event.end.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}) : ""
+                    const timeString = dayName + " (" + startTime + " - " + endTime + ")"
+
+                    //Ask if the user wants to reserve it.
+                    const wantsToReserve = confirm("Reserve slot with " + info.event.title + " on " + timeString + "?")
+
+                    if (wantsToReserve) {
+                        const originalTitle = info.event.title
+                        info.event.setExtendedProp("originalTitle", originalTitle)
+                        info.event.setExtendedProp("isReserved", true)
+                        info.event.setProp("title", originalTitle + " (Reserved)")
+
+                        //Show the reservation box and add the slot to the list.
+                        reservationBox.style.display = "block"
+                        const li = document.createElement("li")
+                        li.id = "res-" + info.event.start.getTime()
+                        li.innerText = originalTitle + " - " + timeString
+                        reservationList.appendChild(li)
+                    }
+                }
             }
         );
 
